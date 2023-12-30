@@ -3,8 +3,10 @@ import Link from "next/link"
 import Header from "../header/page"
 import { useEffect, useState } from "react";
 import axios from "axios";
+
 const page = () => {
     const [products, setProducts] = useState([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         const getProducts = async () => {
             try {
