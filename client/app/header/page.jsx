@@ -68,12 +68,6 @@ const Header = () => {
                                 Products
                             </a>
                             <a
-                                href="/profile"
-                                className="p-2 lg:px-4 md:mx-2 text-gray-600 rounded hover:bg-gray-200 hover:text-gray-700 transition-colors duration-300"
-                            >
-                                Profile
-                            </a>
-                            <a
                                 href="/api/auth/logout"
                                 className="p-2 lg:px-4 md:mx-2 text-indigo-600 text-center border border-transparent rounded hover:bg-indigo-100 hover:text-indigo-700 transition-colors duration-300"
                             >

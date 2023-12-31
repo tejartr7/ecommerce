@@ -6,21 +6,30 @@ import axios from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
 import { redirect } from 'next/navigation';
 import { useRouter } from 'next/navigation';
+import { ReactSortable } from 'react-sortablejs';
+import Spinner from './Spinner';
 const Page = () => {
     console.log("Component rendered");
+    const [isUploading, setIsUploading] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
     const router = useRouter();
+    const [image, setImage] = useState([]);
     async function handleSubmit(e) {
-        // Add logic to handle form submission with the updated state values (title, description, and price)
         e.preventDefault();
 
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('price', price);
+        formData.append('image', image);
         try {
-            const response = await axios.post('http://localhost:8000/addProduct', {
-                title: title,
-                description: description,
-                price: price
+            console.log(formData);
+            const response = await axios.post('http://localhost:8000/addProduct', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             });
             if (response.status === 500) {
                 toast.warn('Failed', {
@@ -63,10 +72,20 @@ const Page = () => {
         setTitle('');
         setDescription('');
         setPrice('');
+        setImage(null);
         setTimeout(() => {
             router.push('/products');
         }, 3000);
     }
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+            console.log("File not found");
+        } else {
+            console.log(file.name);
+            setImage(file);
+        }
+    };
     return (
         <div>
             <ToastContainer />
@@ -86,6 +105,17 @@ const Page = () => {
                             value={title}
                             onChange={(e) => { setTitle(e.target.value) }}
                         />
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description" >Image</label>
+                        <input
+                            className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="description"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(e)}
+                        />
+
                     </div>
                     <div className="mb-6">
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
