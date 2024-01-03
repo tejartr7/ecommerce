@@ -29,8 +29,8 @@ const Header = () => {
             <nav className="bg-white py-2 md:py-4">
                 <div className="container px-4 mx-auto md:flex md:items-center">
                     <div className="flex justify-between items-center">
-                        <a href="#" className="font-bold text-xl text-indigo-600">
-                            FWR
+                        <a href="/" className="font-bold text-xl text-indigo-600">
+                            Admin
                         </a>
                         <button
                             className="border border-solid border-gray-600 px-3 py-1 rounded text-gray-600 bg-indigo-700 opacity-50 hover:opacity-50 md:hidden"

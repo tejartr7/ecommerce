@@ -12,15 +12,15 @@ export default function DeleteProductPage() {
     const router = useRouter();
     const [products, setProducts] = useState([]);
     useEffect(() => {
-        console.log(id);
+        //console.log(id);
         const getProductDetails = async () => {
             try {
                 const res = await axios.get(`http://localhost:8000/addProduct/${id}`);
-                console.log(res);
+                //console.log(res);
                 if (res.status === 200) {
                     const data = res.data;
                     setProducts(data);
-                    console.log(products);
+                   // console.log(products);
                 } else {
                     console.log('Error fetching product details');
                 }
@@ -50,8 +50,6 @@ export default function DeleteProductPage() {
                     progress: undefined,
                     theme: "colored",
                 });
-
-
                 setTimeout(() => {
                     router.push("/");
                 }, 3000);

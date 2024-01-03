@@ -14,12 +14,23 @@ const product = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  category:{
+    type: String,
+    required: true,
+  },
   image: {
     type: String,
     required: true,
-  }
+  },
+  startDate: {
+    type: Date,
+    default: Date.now(),
+  },
+  endDate: {
+    type: Date,
+    default: Date.now()+1000*60*60*24*7,
+  },
 });
-
 const Product = mongoose.model('product', product);
 
 export default Product;

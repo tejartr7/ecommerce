@@ -13,28 +13,35 @@ addProductRouter.post("/", (req, res) => {
                 return res.status(500).json({ message: "File upload failed" });
             }
 
-            const { title, description, price } = req.body;
+            const title = req.body.title;
+            const description = req.body.description;
+            const price = req.body.price;
+            const category = req.body.category;
+            const url = req.body.url;
             const image = req.file;
-            console.log(image);
+            console.log(req.body);
             // Check if the product already exists
             const existingProduct = await Product.findOne({ title: title });
-
-            if (!image) {
+            let result = url;
+            if (image) {
                 // Handle case where no file is uploaded
-                return res.status(400).json({ message: "Missing required parameter - file 456" });
+                result = await cloudinary.uploader.upload(image.path, {
+                    folder: "products",
+                });
+                result = result.secure_url;
             }
-
-            const result = await cloudinary.uploader.upload(image.path, {
-                folder: "products",
-            });
-
-            console.log(result.secure_url);
+            else if(url != null && url != "" && url != undefined && url.length != 0){
+                result=url;
+            }
+            else return res.status(400).json({ message: "Missing required parameter - file" });
+            console.log(result);
             console.log(image);
             if (existingProduct) {
                 // If it exists, update the description and price
                 existingProduct.description = description;
                 existingProduct.price = price;
-                existingProduct.image = result.secure_url;
+                existingProduct.image = result;
+                existingProduct.category = category;
                 await existingProduct.save();
                 return res.status(200).json({ message: "Product updated successfully" });
             } else {
@@ -43,7 +50,8 @@ addProductRouter.post("/", (req, res) => {
                     title: title,
                     description: description,
                     price: price,
-                    image: result.secure_url,
+                    category: category,
+                    image: result,
                 });
 
                 await newProduct.save();

@@ -8,22 +8,47 @@ import { redirect } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { ReactSortable } from 'react-sortablejs';
 import Spinner from './Spinner';
+import Autosuggest from 'react-autosuggest';
 const Page = () => {
-    console.log("Component rendered");
+   // console.log("Component rendered");
     const [isUploading, setIsUploading] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
     const router = useRouter();
     const [image, setImage] = useState([]);
+    const [url, setUrl] = useState('');
+    const [category, setCategory] = useState('');
+    const categories = ['internship', 'fte', 'fresher', 'experience'];
+    const [selectedCategory, setSelectedCategory] = useState('a');
+    const [suggestions, setSuggestions] = useState([]);
+    const currentDate = new Date();
+    const [startDate, setStartDate] = useState(currentDate);
+    const endDate = new Date(currentDate);
+    endDate.setDate(endDate.getDate() + 7);
+    //console.log(startDate);
+    //console.log(endDate);
     async function handleSubmit(e) {
         e.preventDefault();
-
+        if (title == '' || description == '' || price == '' || (image == '' && url == '')) {
+            return toast.warn('Please fill all the fields', {
+                position: "bottom-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
+        }
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
         formData.append('price', price);
         formData.append('image', image);
+        formData.append('category', category);
+        formData.append('url', url);
         try {
             console.log(formData);
             const response = await axios.post('http://localhost:8000/addProduct', formData, {
@@ -73,19 +98,40 @@ const Page = () => {
         setDescription('');
         setPrice('');
         setImage(null);
+        setCategory('');
         setTimeout(() => {
             router.push('/products');
         }, 3000);
     }
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        if (!file) {
-            console.log("File not found");
-        } else {
-            console.log(file.name);
-            setImage(file);
-        }
+        if (!file) return console.log('File not found');
+        if (file.length == 1)
+            return uploadSingleImage();
+        return uploadMultipleImages();
     };
+    const onSuggestionsFetchRequested = ({ value }) => {
+        const inputValue = value.trim().toLowerCase();
+        const inputLength = inputValue.length;
+        setSuggestions(
+            inputLength === 0
+                ? []
+                : categories.filter((category) =>
+                    category.toLowerCase().includes(inputValue)
+                )
+        );
+    };
+    const onSuggestionsClearRequested = () => {
+        setSuggestions([]);
+    };
+
+    const getSuggestionValue = (suggestion) => suggestion;
+
+    const renderSuggestion = (suggestion) => (
+        <div className="suggestion-item">
+            {suggestion}
+        </div>
+    );
     return (
         <div>
             <ToastContainer />
@@ -106,6 +152,30 @@ const Page = () => {
                             onChange={(e) => { setTitle(e.target.value) }}
                         />
                     </div>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-name">
+                            Category
+                        </label>
+                        <Autosuggest
+                            className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline form-control"
+                            suggestions={suggestions}
+                            onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                            onSuggestionsClearRequested={onSuggestionsClearRequested}
+                            getSuggestionValue={getSuggestionValue}
+                            renderSuggestion={renderSuggestion}
+                            inputProps={{
+                                placeholder: 'Category',
+                                value: category,
+                                onChange: (event, { newValue }) => setCategory(newValue),
+                            }}
+                            theme={{
+                                container: 'autosuggest-container',
+                                suggestionsContainer: 'suggestions-container',
+                                suggestionsList: 'suggestions-list',
+                            }}
+                        />
+                    </div>
+
                     <div>
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description" >Image</label>
                         <input
@@ -117,6 +187,21 @@ const Page = () => {
                         />
 
                     </div>
+                    <div className='text-center'>
+                        <p className='para-center font-bold text-4xl '>(or)</p>
+                    </div>
+                    <div>
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
+                            Image URL
+                        </label>
+                        <input
+                            className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="price"
+                            type="text"
+                            placeholder="Image url"
+                            value={url}
+                            onChange={(e) => { setUrl(e.target.value) }}
+                        /></div>
                     <div className="mb-6">
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
                             Product Description
@@ -132,7 +217,7 @@ const Page = () => {
                     </div>
                     <div className="mb-6">
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
-                            Price (In USD)
+                            Stipend/Salary(In USD)
                         </label>
                         <input
                             className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -152,8 +237,8 @@ const Page = () => {
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 export default Page;

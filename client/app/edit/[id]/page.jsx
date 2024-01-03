@@ -7,17 +7,20 @@ import { usePathname } from 'next/navigation';
 import Header from '@/app/header/page';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
+import Image from 'next/image';
+
 // Create the functional component
 const Page = () => {
   // Get the router object
   const router = usePathname();
   const id = router.substring(6);
-
+  const route = useRouter();
   // State variables to hold product details
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-
+  const [image, setImage] = useState('');
+  const [url, setUrl] = useState('');
   // Use useEffect to fetch product details when the component mounts
   useEffect(() => {
     // Function to fetch product details by ID
@@ -28,8 +31,9 @@ const Page = () => {
           const data = res.data;
           setTitle(data.title);
           setDescription(data.description);
-          setPrice(data.Price);
-          console.log(data);
+          setPrice(data.price);
+          setUrl(data.image);
+          //console.log(data);
         } else {
           console.log('Error fetching product details');
         }
@@ -43,7 +47,15 @@ const Page = () => {
       getProductDetails();
     }
   }, [id]);
-
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      console.log("File not found");
+    } else {
+      console.log(file.name);
+      setImage(file);
+    }
+  };
   // Function to handle form submission and update product details
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,6 +67,12 @@ const Page = () => {
         description: description,
         price: price,
         id: id,
+        image: image,
+        url: url,
+      }, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
       if (res.status === 200) {
         console.log('Product updated successfully');
@@ -94,6 +112,9 @@ const Page = () => {
         theme: "colored",
       });
     }
+    setTimeout(() => {
+      route.push("/products");
+    }, 3000);
   };
 
   // JSX structure for the component
@@ -121,6 +142,34 @@ const Page = () => {
                 setTitle(e.target.value);
               }}
             />
+          </div>
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description" >Image</label>
+            <input
+              className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="description"
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e)}
+            />
+          </div>
+          <div className='text-center'>
+            <p className='para-center font-bold text-4xl '>(or)</p>
+          </div>
+          <div>
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
+              Image URL
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="price"
+              type="text"
+              placeholder="Image url"
+              value={url}
+              onChange={(e) => { setUrl(e.target.value) }}
+            /></div>
+          <div className='flex items-center justify-center m-2'>
+            <img src={url} alt='image' style={{ width: '30%', height: '30vh' }} />
           </div>
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">

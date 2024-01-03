@@ -6,24 +6,41 @@ import axios from "axios";
 
 const page = () => {
     const [products, setProducts] = useState([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    var currentDate = new Date();
+   // console.log(currentDate);
+    const removeProductFromDatabase = async (productId) => {
+        try {
+            const res = await axios.delete(`http://localhost:8000/updateProduct/${productId}`);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
         const getProducts = async () => {
             try {
-                const res = await axios.get('http://localhost:8000/addProduct'); // Update the endpoint
+                const res = await axios.get('http://localhost:8000/addProduct');
                 if (res.status === 200) {
-                    const data = res.data; // Access the data property
-                    console.log(data);
-                    setProducts(data);
+                    const data = res.data;
+                    // Filter out products with endDate in the past
+                    const filteredProducts = data.filter(product => new Date(product.endDate) > currentDate);
+                    setProducts(filteredProducts);
+
+                    // Remove products with endDate in the past from the database
+                    data.forEach(async (product) => {
+                        if (new Date(product.endDate) <= currentDate) {
+                            await removeProductFromDatabase(product._id);
+                        }
+                    });
                 } else {
-                    console.log('error');
+                    console.log('Error fetching products from the database.');
                 }
             } catch (error) {
                 console.log(error);
             }
         };
         getProducts();
-    }, []);
+    }, [currentDate]);
     return (
         <div>
             <Header />
