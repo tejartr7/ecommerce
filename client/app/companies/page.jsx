@@ -37,7 +37,7 @@ const page = () => {
    // console.log(currentDate);
     const removeProductFromDatabase = async (productId) => {
         try {
-            const res = await axios.delete(`http://localhost:8000/updateProduct/${productId}`);
+            const res = await axios.delete(`https://admin-dashboard-s3ji.onrender.com/updateProduct/${productId}`);
         } catch (error) {
             console.log(error);
         }
@@ -46,7 +46,7 @@ const page = () => {
     useEffect(() => {
         const getProducts = async () => {
             try {
-                const res = await axios.get('http://localhost:8000/addProduct');
+                const res = await axios.get('https://admin-dashboard-s3ji.onrender.com/addProduct');
                 if (res.status === 200) {
                     const data = res.data;
                     // Filter out products with endDate in the past

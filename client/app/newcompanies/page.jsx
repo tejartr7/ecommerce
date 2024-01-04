@@ -79,7 +79,7 @@ const Page = () => {
         formData.append('link', link);
         try {
             console.log(formData);
-            const response = await axios.post('http://localhost:8000/addProduct', formData, {
+            const response = await axios.post('https://admin-dashboard-s3ji.onrender.com/addProduct', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

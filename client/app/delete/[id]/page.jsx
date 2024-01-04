@@ -41,7 +41,7 @@ export default function DeleteProductPage() {
         //console.log(id);
         const getProductDetails = async () => {
             try {
-                const res = await axios.get(`http://localhost:8000/addProduct/${id}`);
+                const res = await axios.get(`https://admin-dashboard-s3ji.onrender.com/addProduct/${id}`);
                 //console.log(res);
                 if (res.status === 200) {
                     const data = res.data;
@@ -61,7 +61,7 @@ export default function DeleteProductPage() {
 
     const deleteProduct = async () => {
         try {
-            const res = await axios.delete(`http://localhost:8000/updateProduct/${id}`, {
+            const res = await axios.delete(`https://admin-dashboard-s3ji.onrender.com/updateProduct/${id}`, {
                 id: id,
             });
             if (res.status === 200) {

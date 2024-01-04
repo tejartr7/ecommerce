@@ -57,7 +57,7 @@ const Page = () => {
     // Function to fetch product details by ID
     const getProductDetails = async () => {
       try {
-        const res = await axios.get(`http://localhost:8000/addProduct/${id}`);
+        const res = await axios.get(`https://admin-dashboard-s3ji.onrender.com/addProduct/${id}`);
         if (res.status === 200) {
           const data = res.data;
           setTitle(data.title);
@@ -117,7 +117,7 @@ const Page = () => {
       formData.append('id', id);
       formData.append('link', link);
       console.log(formData);
-      const res = await axios.put(`http://localhost:8000/updateProduct/${id}`, formData, {
+      const res = await axios.put(`https://admin-dashboard-s3ji.onrender.com/updateProduct/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
