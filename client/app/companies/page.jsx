@@ -4,7 +4,7 @@ import Header from "../header/page"
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-const page = () => {
+const Page = () => {
     const [products, setProducts] = useState([]);
     const [user,setUser]=useState(null);
     var currentDate = new Date();
@@ -109,4 +109,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page;
