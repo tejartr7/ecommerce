@@ -22,13 +22,17 @@ const product = new mongoose.Schema({
     type: String,
     required: true,
   },
+  link:{
+    type: String,
+    required: true,
+  },
   startDate: {
     type: Date,
     default: Date.now(),
   },
   endDate: {
     type: Date,
-    default: Date.now()+1000*60*60*24*7,
+    default: Date.now()+1000*60*60*24*3,
   },
 });
 const Product = mongoose.model('product', product);

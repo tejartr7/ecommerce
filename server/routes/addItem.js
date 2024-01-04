@@ -19,6 +19,7 @@ addProductRouter.post("/", (req, res) => {
             const category = req.body.category;
             const url = req.body.url;
             const image = req.file;
+            const applyLink = req.body.link;
             console.log(req.body);
             // Check if the product already exists
             const existingProduct = await Product.findOne({ title: title });
@@ -30,8 +31,8 @@ addProductRouter.post("/", (req, res) => {
                 });
                 result = result.secure_url;
             }
-            else if(url != null && url != "" && url != undefined && url.length != 0){
-                result=url;
+            else if (url != null && url != "" && url != undefined && url.length != 0) {
+                result = url;
             }
             else return res.status(400).json({ message: "Missing required parameter - file" });
             console.log(result);
@@ -42,6 +43,7 @@ addProductRouter.post("/", (req, res) => {
                 existingProduct.price = price;
                 existingProduct.image = result;
                 existingProduct.category = category;
+                existingProduct.link = link;
                 await existingProduct.save();
                 return res.status(200).json({ message: "Product updated successfully" });
             } else {
@@ -50,10 +52,10 @@ addProductRouter.post("/", (req, res) => {
                     title: title,
                     description: description,
                     price: price,
+                    link: applyLink,
                     category: category,
                     image: result,
                 });
-
                 await newProduct.save();
                 return res.status(201).json({ message: "Product created successfully" });
             }
