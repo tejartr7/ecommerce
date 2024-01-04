@@ -11,6 +11,32 @@ export default function DeleteProductPage() {
     const id = path.substring(8);
     const router = useRouter();
     const [products, setProducts] = useState([]);
+    const [user, setUser] = useState(null);
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            //  console.log('Fetching user data...');
+            try {
+                const response = await fetch('/api/auth/me');
+                console.log(user);
+                // setTimeout(() => { }, 10000);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                // console.log('User data:', data.email);
+                //console.log(process.env.);
+                if (!process.env.NEXT_PUBLIC_admins.includes(data.email)) {
+                    router.push('/caution');
+                }
+                setUser(data);
+            } catch (error) {
+                console.error('Error fetching user details:', error.message);
+                router.push('/caution');
+            }
+        };
+
+        fetchUserDetails();
+    }, [user]);
     useEffect(() => {
         //console.log(id);
         const getProductDetails = async () => {

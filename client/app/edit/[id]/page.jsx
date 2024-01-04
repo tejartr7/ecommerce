@@ -8,7 +8,7 @@ import Header from '@/app/header/page';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
 import Image from 'next/image';
-
+import Autosuggest from 'react-autosuggest';
 // Create the functional component
 const Page = () => {
   // Get the router object
@@ -20,8 +20,39 @@ const Page = () => {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [image, setImage] = useState('');
+  const [link, setLink] = useState('');
   const [url, setUrl] = useState('');
+  const categories = ['internship', 'fte', 'fresher', 'experience'];
+  const [selectedCategory, setSelectedCategory] = useState('internship');
+  const [suggestions, setSuggestions] = useState([]);
+  const [category, setCategory] = useState('internship');
+  const [user, setUser] = useState(null);
   // Use useEffect to fetch product details when the component mounts
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      //  console.log('Fetching user data...');
+      try {
+        const response = await fetch('/api/auth/me');
+        console.log(user);
+        // setTimeout(() => { }, 10000);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        // console.log('User data:', data.email);
+        //console.log(process.env.);
+        if (!process.env.NEXT_PUBLIC_admins.includes(data.email)) {
+          route.push('/caution');
+        }
+        setUser(data);
+      } catch (error) {
+        console.error('Error fetching user details:', error.message);
+        route.push('/caution');
+      }
+    };
+
+    fetchUserDetails();
+  }, [user]);
   useEffect(() => {
     // Function to fetch product details by ID
     const getProductDetails = async () => {
@@ -33,6 +64,8 @@ const Page = () => {
           setDescription(data.description);
           setPrice(data.price);
           setUrl(data.image);
+          setCategory(data.category);
+          setLink(data.link);
           //console.log(data);
         } else {
           console.log('Error fetching product details');
@@ -62,14 +95,29 @@ const Page = () => {
 
     try {
       // Make a PUT request to update the product
-      const res = await axios.put(`http://localhost:8000/updateProduct/${id}`, {
-        title: title,
-        description: description,
-        price: price,
-        id: id,
-        image: image,
-        url: url,
-      }, {
+      if (title == '' || description == '' || price == '' || link == '' || category == '' || (image == '' && url == '')) {
+        return toast.warn('Please fill all the fields', {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      }
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('price', price);
+      formData.append('image', image);
+      formData.append('category', category);
+      formData.append('url', url);
+      formData.append('id', id);
+      formData.append('link', link);
+      console.log(formData);
+      const res = await axios.put(`http://localhost:8000/updateProduct/${id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -113,10 +161,29 @@ const Page = () => {
       });
     }
     setTimeout(() => {
-      route.push("/products");
+      router.push('/companies');
     }, 3000);
   };
-
+  const onSuggestionsFetchRequested = ({ value }) => {
+    const inputValue = value.trim().toLowerCase();
+    const inputLength = inputValue.length;
+    setSuggestions(
+      inputLength === 0
+        ? []
+        : categories.filter((category) =>
+          category.toLowerCase().includes(inputValue)
+        )
+    );
+  };
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
+  const renderSuggestion = (suggestion) => (
+    <div className="suggestion-item">
+      {suggestion}
+    </div>
+  );
+  const getSuggestionValue = (suggestion) => suggestion;
   // JSX structure for the component
   return (
     <div>
@@ -141,6 +208,42 @@ const Page = () => {
               onChange={(e) => {
                 setTitle(e.target.value);
               }}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-name">
+              Category
+            </label>
+            <Autosuggest
+              className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline form-control"
+              suggestions={suggestions}
+              onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+              onSuggestionsClearRequested={onSuggestionsClearRequested}
+              getSuggestionValue={getSuggestionValue}
+              renderSuggestion={renderSuggestion}
+              inputProps={{
+                placeholder: 'Category',
+                value: category,
+                onChange: (event, { newValue }) => setCategory(newValue),
+              }}
+              theme={{
+                container: 'autosuggest-container',
+                suggestionsContainer: 'suggestions-container',
+                suggestionsList: 'suggestions-list',
+              }}
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-name">
+              Job Link
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="product-name"
+              type="text"
+              placeholder="Job link"
+              value={link}
+              onChange={(e) => { setLink(e.target.value) }}
             />
           </div>
           <div>

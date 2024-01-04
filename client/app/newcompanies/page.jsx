@@ -1,7 +1,7 @@
 'use client';
 import { ToastContainer, toast } from 'react-toastify';
 import Header from '../header/page'
-import { useState } from 'react';
+import { useState,useEffect} from 'react';
 import axios from 'axios';
 import 'react-toastify/dist/ReactToastify.css';
 import { redirect } from 'next/navigation';
@@ -10,17 +10,19 @@ import { ReactSortable } from 'react-sortablejs';
 import Spinner from './Spinner';
 import Autosuggest from 'react-autosuggest';
 const Page = () => {
-   // console.log("Component rendered");
+    // console.log("Component rendered");
+    const [user, setUser] = useState(null);
     const [isUploading, setIsUploading] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState('');
     const router = useRouter();
     const [image, setImage] = useState([]);
+    const [link, setLink] = useState('');
     const [url, setUrl] = useState('');
     const [category, setCategory] = useState('');
     const categories = ['internship', 'fte', 'fresher', 'experience'];
-    const [selectedCategory, setSelectedCategory] = useState('a');
+    const [selectedCategory, setSelectedCategory] = useState('internship');
     const [suggestions, setSuggestions] = useState([]);
     const currentDate = new Date();
     const [startDate, setStartDate] = useState(currentDate);
@@ -28,9 +30,34 @@ const Page = () => {
     endDate.setDate(endDate.getDate() + 7);
     //console.log(startDate);
     //console.log(endDate);
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            //  console.log('Fetching user data...');
+            try {
+                const response = await fetch('/api/auth/me');
+                console.log(user);
+                // setTimeout(() => { }, 10000);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                // console.log('User data:', data.email);
+                //console.log(process.env.);
+                if (!process.env.NEXT_PUBLIC_admins.includes(data.email)) {
+                    router.push('/caution');
+                }
+                setUser(data);
+            } catch (error) {
+                console.error('Error fetching user details:', error.message);
+                router.push('/caution');
+            }
+        };
+
+        fetchUserDetails();
+    }, [user]);
     async function handleSubmit(e) {
         e.preventDefault();
-        if (title == '' || description == '' || price == '' || (image == '' && url == '')) {
+        if (title == '' || description == '' || price == '' || link == '' || category == '' || (image == '' && url == '')) {
             return toast.warn('Please fill all the fields', {
                 position: "bottom-right",
                 autoClose: 3000,
@@ -49,6 +76,7 @@ const Page = () => {
         formData.append('image', image);
         formData.append('category', category);
         formData.append('url', url);
+        formData.append('link', link);
         try {
             console.log(formData);
             const response = await axios.post('http://localhost:8000/addProduct', formData, {
@@ -100,7 +128,7 @@ const Page = () => {
         setImage(null);
         setCategory('');
         setTimeout(() => {
-            router.push('/products');
+            router.push('/companies');
         }, 3000);
     }
     const handleImageChange = (e) => {
@@ -175,7 +203,19 @@ const Page = () => {
                             }}
                         />
                     </div>
-
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="product-name">
+                            Job Link
+                        </label>
+                        <input
+                            className="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="product-name"
+                            type="text"
+                            placeholder="Apply link"
+                            value={link}
+                            onChange={(e) => { setLink(e.target.value) }}
+                        />
+                    </div>
                     <div>
                         <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description" >Image</label>
                         <input

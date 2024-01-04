@@ -3,10 +3,37 @@ import Link from "next/link"
 import Header from "../header/page"
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+import { useRouter } from "next/navigation";
 const page = () => {
     const [products, setProducts] = useState([]);
+    const [user,setUser]=useState(null);
     var currentDate = new Date();
+    const router=useRouter();
+    useEffect(() => {
+        const fetchUserDetails = async () => {
+            //  console.log('Fetching user data...');
+            try {
+                const response = await fetch('/api/auth/me');
+                console.log(user);
+                // setTimeout(() => { }, 10000);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                // console.log('User data:', data.email);
+                //console.log(process.env.);
+                if (!process.env.NEXT_PUBLIC_admins.includes(data.email)) {
+                    router.push('/caution');
+                }
+                setUser(data);
+            } catch (error) {
+                console.error('Error fetching user details:', error.message);
+                router.push('/caution');
+            }
+        };
+
+        fetchUserDetails();
+    }, [user]);
    // console.log(currentDate);
     const removeProductFromDatabase = async (productId) => {
         try {
@@ -25,10 +52,8 @@ const page = () => {
                     // Filter out products with endDate in the past
                     const filteredProducts = data.filter(product => new Date(product.endDate) > currentDate);
                     setProducts(filteredProducts);
-
-                    // Remove products with endDate in the past from the database
                     data.forEach(async (product) => {
-                        if (new Date(product.endDate) <= currentDate) {
+                        if (new Date(product.endDate) < currentDate) {
                             await removeProductFromDatabase(product._id);
                         }
                     });
